@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Running pylint..."
-pylint $(git ls-files '*.py')
+pylint --fail-under=3.0 $(git ls-files '*.py')
 
 if [ $? -ne 0 ]; then
   echo "pylint failed. Aborting push."
