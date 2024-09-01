@@ -10,11 +10,12 @@ fi
 
 echo "pylint passed. Proceeding with Terraform documentation script."
 
+GIT_BASH_PATH="/c/Program Files/Git/bin/bash.exe"
 SCRIPT_PATH="devops/terraform/readme.sh"
 
 if [ -x "$SCRIPT_PATH" ]; then
     echo "Running Terraform documentation script..."
-    bash "$SCRIPT_PATH"
+    "$GIT_BASH_PATH" "$SCRIPT_PATH"
     if [ $? -ne 0 ]; then
         echo "Terraform documentation script failed. Aborting push."
         exit 1
