@@ -1,0 +1,32 @@
+*
+!/.gitignore
+
+### Terraform Portion
+
+!terraform/**/*
+!terraform/**/*.tf
+
+terraform/**/*.tfstate
+terraform/**/*.tfstate.backup
+terraform/**/.terraform/
+terraform/**/*.tfvars
+
+### Devops Portion
+
+!project/devops/
+!project/devops/**
+
+project/devops/**/docker-compose.override.yml
+project/devops/**/.jenkins/
+project/devops/**/workspace/
+project/devops/**/logs/
+
+.idea/
+.vscode/
+*.iml
+*.swp
+
+*.log
+*.tmp
+*.bak
+.DS_Store
