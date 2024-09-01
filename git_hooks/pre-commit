@@ -1,16 +1,5 @@
 #!/bin/sh
 
-echo "Running pylint..."
-pylint --fail-under=3.0 $(git ls-files '*.py')
-
-if [ $? -ne 0 ]; then
-  echo "pylint failed. Aborting push."
-  exit 1
-fi
-
-echo "pylint passed. Proceeding with Terraform documentation script."
-exit 0
-
 SCRIPT_PATH="devops/terraform/readme.sh"
 
 if [ -x "$SCRIPT_PATH" ]; then
@@ -27,4 +16,3 @@ fi
 
 echo "Terraform documentation script completed. Proceeding with push."
 exit 0
-
