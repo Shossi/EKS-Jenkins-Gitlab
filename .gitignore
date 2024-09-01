@@ -1,21 +1,31 @@
 *
+
 !/.gitignore
 
-!terraform/**/*
-!terraform/**/*.tf
+### Terraform Portion
 
-terraform/**/*.tfstate
-terraform/**/*.tfstate.backup
-terraform/**/.terraform/
-terraform/**/*.tfvars
+!devops/terraform/**/*
+!devops/terraform/**/*.tf
 
-!project/devops/
-!project/devops/**
+devops/terraform/**/*.tfstate
+devops/terraform/**/*.tfstate.backup
+devops/terraform/**/.terraform/
+devops/terraform/**/*.tfvars
 
-project/devops/**/docker-compose.override.yml
-project/devops/**/.jenkins/
-project/devops/**/workspace/
-project/devops/**/logs/
+### DevOps Portion
+
+!devops/application/
+!devops/application/**
+!devops/Configurations/
+!devops/Configurations/**
+!devops/pipelines/
+!devops/pipelines/**
+
+devops/**/docker-compose.override.yml
+
+devops/**/.jenkins/
+devops/**/workspace/
+devops/**/logs/
 
 .idea/
 .vscode/
