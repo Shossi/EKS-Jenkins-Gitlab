@@ -1,15 +1,29 @@
 #!/bin/sh
 
-# Run pylint
 echo "Running pylint..."
 pylint $(git ls-files '*.py')
 
-# Check if pylint passed
 if [ $? -ne 0 ]; then
   echo "pylint failed. Aborting push."
   exit 1
 fi
 
-echo "pylint passed. Proceeding with push."
+echo "pylint passed. Proceeding with Terraform documentation script."
+
+SCRIPT_PATH="devops/terraform/readme.sh"
+
+if [ -x "$SCRIPT_PATH" ]; then
+    echo "Running Terraform documentation script..."
+    "$SCRIPT_PATH"
+    if [ $? -ne 0 ]; then
+        echo "Terraform documentation script failed. Aborting push."
+        exit 1
+    fi
+else
+    echo "Script not found or not executable: $SCRIPT_PATH"
+    exit 1
+fi
+
+echo "Terraform documentation script completed. Proceeding with push."
 exit 0
 

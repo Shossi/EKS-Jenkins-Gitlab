@@ -22,6 +22,7 @@
 !*.jpeg
 !pre-push
 !cloudwatch-config.json
+!*.bat
 
 # Allow directories specific to this project
 !devops/application/
