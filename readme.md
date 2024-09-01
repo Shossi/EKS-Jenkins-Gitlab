@@ -1,6 +1,9 @@
+
+---
+
 # Jenkins-GitLab CI/CD Pipeline Project
 
-![Architecture Diagram](./architecture.jpeg) 
+![Architecture Diagram](./architecture.jpeg)
 
 ## Overview
 
@@ -12,8 +15,10 @@ This project automates the deployment of a cloud infrastructure using Terraform,
 - Terraform
 - Slack for notifications
 
+For detailed information about the infrastructure setup and Terraform modules, please refer to the [Terraform Documentation](./devops/terraform/README.md).
+
 ## Table of Contents
-[readme.md](..%2Fyossi.shalumov%2Fproject%2Freadme.md)
+
 1. [Infrastructure Overview](#infrastructure-overview)
 2. [Terraform Components](#terraform-components)
     - [VPC and Subnets](#vpc-and-subnets)
@@ -22,18 +27,18 @@ This project automates the deployment of a cloud infrastructure using Terraform,
     - [Load Balancer](#load-balancer)
     - [EKS Cluster](#eks-cluster)
 3. [Pipelines](#pipelines)
-    - [Branches Pipeline](#Branches-pipeline)
-    - [Master Pipeline](#Master-pipeline)
+    - [Branches Pipeline](#branches-pipeline)
+    - [Master Pipeline](#master-pipeline)
 4. [Application](#application)
 5. [Tests](#tests)
-6. [Monitoring](#AWS-CloudWatch-Monitoring)
+6. [Monitoring](#aws-cloudwatch-monitoring)
 7. [Configurations](#configurations)
-     - [Jenkins](#jenkins)
-     - [GitLab](#gitlab)
+    - [Jenkins](#jenkins)
+    - [GitLab](#gitlab)
 
 ## Infrastructure Overview
 
-The infrastructure is entirely managed by Terraform and includes the following components:
+The infrastructure is entirely managed by Terraform and includes the following components. For more details, please see the [Terraform Documentation](./devops/terraform/README.md).
 
 ## Terraform Components
 
@@ -48,16 +53,16 @@ The infrastructure is entirely managed by Terraform and includes the following c
 
 ### Instances
 
-- `Jenkins Agent`     : private subnet.
+- `Jenkins Agent`: private subnet.
 - `Jenkins Controller`: private subnet.
-- `GitLab`            : private subnet.
-- `Bastion Host`      : public subnet.
+- `GitLab`: private subnet.
+- `Bastion Host`: public subnet.
 
 ### Load Balancer
 
 - Application Load Balancer with listeners for Jenkins and GitLab.
-- `Jenkins` : port 8080
-- `Gitlab`  : port 80
+- `Jenkins`: port 8080
+- `GitLab`: port 80
 
 ### EKS Cluster
 
@@ -68,23 +73,24 @@ The infrastructure is entirely managed by Terraform and includes the following c
 ![Pipeline Diagram](./pipeline.jpeg)
 
 ### Branches Pipeline
-- Stages :
-  - Build Docker Image
-  - Test Docker Image
-  
-- `Trigger` : Merge Request to Master branch.
+
+- Stages:
+    - Build Docker Image
+    - Test Docker Image
+
+- `Trigger`: Merge Request to Master branch.
 
 ### Master Pipeline
 
 - Stages:
     - Determines the source branch of the merge request.
-    - Updates the version depending on source branch (Major for `release/*`, Minor for `feature/*`, Patch for `hotfix/*`).
+    - Updates the version depending on the source branch (Major for `release/*`, Minor for `feature/*`, Patch for `hotfix/*`).
     - Builds the artifact (Docker image).
     - Pushes the Docker image to Docker Hub ([yossizxc/weather](https://hub.docker.com/repository/docker/yossizxc/weather/general)).
     - Changes the kubeconfig context to the cluster using `aws eks update-kubeconfig`.
     - Deploys the new Docker image on the two nodes.
 
-- `Trigger`: Accepted Merge Request to Master Branch. 
+- `Trigger`: Accepted Merge Request to Master Branch.
 
 ## Application
 
@@ -95,9 +101,9 @@ The infrastructure is entirely managed by Terraform and includes the following c
 
 - **Connectivity Test:**
     - Checks if the server is running properly by sending a request to the localhost on the specified port.
-  
+
 - **Code Linting:**
-  - A pre-push Git hook runs pylint to ensure code quality before code is pushed to the repository.
+    - A pre-push Git hook runs pylint to ensure code quality before code is pushed to the repository.
 
 ## AWS CloudWatch Monitoring
 
@@ -120,7 +126,7 @@ This project uses AWS CloudWatch to monitor the infrastructure:
     - AWS Credentials.
     - DockerHub Credentials.
     - SSH key or other configurations for agent-controller connection.
-    - Slack Credentials
+    - Slack Credentials.
 
 - **Pipelines:**
     - Create two pipelines with the relevant configurations:
@@ -136,3 +142,4 @@ This project uses AWS CloudWatch to monitor the infrastructure:
     - One webhook for the branch pipeline (builds and tests).
     - Another webhook for the deployment pipeline (triggered upon merge request acceptance).
 
+---
