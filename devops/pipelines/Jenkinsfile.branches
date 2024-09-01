@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build and Test') {
+            steps {
+                dir('src') { 
+                    script {
+                        try {
+                            sh "sudo docker-compose build"
+                            sh "sudo docker-compose down"
+                            sh "sudo docker-compose --compatibility up -d"
+                            sleep(time: 3, unit: "SECONDS")
+                            sh "./tests/unittest.sh"
+                            sh "sudo docker-compose down"
+                        } catch (error) {
+                            sh "sudo docker-compose down"
+                            echo "Test failed - Sending msg to slack"
+                            error error
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            script {
+                slackSend(channel: "succeeded-build", color: 'good', message: "Build $GIT_BRANCH passed successfully")
+            }
+        }
+        failure {
+            script {
+                slackSend(channel: "devops-alerts", color: 'danger', message: "Build $GIT_BRANCH failed! Reason: ${error}")
+            }
+        }
+        always {
+            cleanWs()
+            sh "sudo rm -rf pipeline"
+            sh "docker rmi \$(docker images --filter 'dangling=true' -q --no-trunc)"
+        }
+    }
+}

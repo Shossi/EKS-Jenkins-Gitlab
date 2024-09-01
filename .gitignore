@@ -1,38 +1,46 @@
-*
+*.*
 
-!/.gitignore
+!.gitignore
+!*.md
+!*.sh
+!*.py
+!*.html
+!requirements.txt
+!nginx.conf
+!*.dockerignore
+!*.yml
+!*yaml
+!Dockerfile
+!*.Dockerfile
+!*.css
+!*.Jenkinsfile
+!Jenkinsfile.*
+!Jenkinsfile
+!*.tf
+!*.conf
+!*.png
+!*.jpeg
+!pre-push
+!cloudwatch-config.json
 
-### Terraform Portion
-
-!devops/terraform/**/*
-!devops/terraform/**/*.tf
-
-devops/terraform/**/*.tfstate
-devops/terraform/**/*.tfstate.backup
-devops/terraform/**/.terraform/
-devops/terraform/**/*.tfvars
-
-### DevOps Portion
-
+# Allow directories specific to this project
 !devops/application/
-!devops/application/**
 !devops/Configurations/
-!devops/Configurations/**
 !devops/pipelines/
-!devops/pipelines/**
+!devops/terraform/
+!git_hooks/
+!src/
 
-devops/**/docker-compose.override.yml
+# Ignore files related to plan, vault, lock files, Terraform states, and variables
+plan
+vault
+*.lock
+*.terraform
+*.tfstate
+*.tfvars
 
-devops/**/.jenkins/
-devops/**/workspace/
-devops/**/logs/
-
+# Ignore IDE and editor specific files
 .idea/
 .vscode/
 *.iml
 *.swp
-
-*.log
-*.tmp
-*.bak
-.DS_Store
