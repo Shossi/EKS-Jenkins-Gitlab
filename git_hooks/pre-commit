@@ -15,4 +15,7 @@ else
 fi
 
 echo "Terraform documentation script completed. Proceeding with push."
+
+git add terraform/README.md terraform/modules/README.md
+
 exit 0
