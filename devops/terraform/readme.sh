@@ -2,7 +2,7 @@
 
 # Define the directories for the READMEs
 SUBMODULES_README_DIR="./modules"
-MAINMODULES_README_DIR="./"
+MAINMODULES_README_DIR="."
 
 # Define the README file paths
 SUBMODULES_README_FILE="${SUBMODULES_README_DIR}/README.md"
@@ -19,23 +19,28 @@ generate_tree_markdown() {
     echo '```' >> "$readme_file"
 }
 
-# Create a README for Submodules
-echo "# Submodules Documentation" > "$SUBMODULES_README_FILE"
-echo -e "\n## Table of Contents\n" >> "$SUBMODULES_README_FILE"
+# Check if the modules directory exists before proceeding
+if [ -d "$SUBMODULES_README_DIR" ]; then
+    # Create a README for Submodules
+    echo "# Submodules Documentation" > "$SUBMODULES_README_FILE"
+    echo -e "\n## Table of Contents\n" >> "$SUBMODULES_README_FILE"
 
-# Generate Table of Contents for submodules
-find "$SUBMODULES_README_DIR" -mindepth 1 -maxdepth 2 -type d ! -path "*/.terraform*" | while read -r dir; do
-  module_name=$(basename "${dir}")
-  echo "- [${module_name}](#${module_name})" >> "$SUBMODULES_README_FILE"
-done
+    # Generate Table of Contents for submodules
+    find "$SUBMODULES_README_DIR" -mindepth 1 -maxdepth 2 -type d ! -path "*/.terraform*" | while read -r dir; do
+      module_name=$(basename "${dir}")
+      echo "- [${module_name}](#${module_name})" >> "$SUBMODULES_README_FILE"
+    done
 
-# Generate documentation for submodules
-find "$SUBMODULES_README_DIR" -mindepth 1 -maxdepth 2 -type d ! -path "*/.terraform*" | while read -r dir; do
-  module_name=$(basename "${dir}")
-  echo -e "\n\n## ${module_name}" >> "$SUBMODULES_README_FILE"
-  echo -e "\n---\n" >> "$SUBMODULES_README_FILE"
-  terraform-docs markdown table "${dir}" >> "$SUBMODULES_README_FILE"
-done
+    # Generate documentation for submodules
+    find "$SUBMODULES_README_DIR" -mindepth 1 -maxdepth 2 -type d ! -path "*/.terraform*" | while read -r dir; do
+      module_name=$(basename "${dir}")
+      echo -e "\n\n## ${module_name}" >> "$SUBMODULES_README_FILE"
+      echo -e "\n---\n" >> "$SUBMODULES_README_FILE"
+      terraform-docs markdown table "${dir}" >> "$SUBMODULES_README_FILE"
+    done
+else
+    echo "Modules directory not found: $SUBMODULES_README_DIR"
+fi
 
 # Create a README for Main Modules
 echo "# Main Terraform Modules Documentation" > "$MAINMODULES_README_FILE"

@@ -17,20 +17,34 @@ choco install tree --yes
 :: Install terraform-docs
 choco install terraform-docs --yes
 
-:: Install pylint
+:: Install python and pylint
 choco install python --yes
 pip install pylint
+
+:: Locate terraform-docs and add it to PATH if not already present
+for /f "delims=" %%a in ('where terraform-docs') do (
+    set "terraform_docs_path=%%~dpa"
+)
+if not defined terraform_docs_path (
+    echo "Adding terraform-docs to PATH..."
+    set "terraform_docs_path=C:\ProgramData\chocolatey\lib\terraform-docs\tools\"
+    setx PATH "%PATH%;%terraform_docs_path%"
+)
+
+:: Locate pylint and add it to PATH if not already present
+for /f "delims=" %%a in ('where pylint') do (
+    set "pylint_path=%%~dpa"
+)
+if not defined pylint_path (
+    echo "Adding pylint to PATH..."
+    for /f "delims=" %%a in ('pip show pylint ^| findstr /r /c:"Location:"') do (
+        set "pylint_location=%%a"
+    )
+    set "pylint_location=%pylint_location:Location=%
+    set "pylint_location=%pylint_location: =%\Scripts\"
+    setx PATH "%PATH%;%pylint_location%"
+)
 
 echo Installation completed. Please restart your terminal or run 'refreshenv' to apply changes.
 
 exit 0
-
-
-:: in case of pylint command not running after the installation :
-:: You will need to Locate your python scripts directory path,
-:: Ususally it will look like so : C:\Users\***user***\AppData\Local\Packages\PYTHONVERSION\LocalCache\local-packages\Pythonversion\Scripts
-:: This can be found through : pip show pylint
-:: The path needs to be added to your env variables in your computer,
-:: System Properties > Advanced > Environment Variables > Path > Edit > new
-:: and add the scripts path there. after which you will need to restart your ide and it will work.
-:: pylint --version to verify.
