@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define the directories for the READMEs
-SUBMODULES_README_DIR="./modules"
-MAINMODULES_README_DIR="."
+SUBMODULES_README_DIR="./terraform/modules"
+MAINMODULES_README_DIR="./terraform"
 
 # Define the README file paths
 SUBMODULES_README_FILE="${SUBMODULES_README_DIR}/README.md"
