@@ -1,8 +1,6 @@
 *
 !/.gitignore
 
-### Terraform Portion
-
 !terraform/**/*
 !terraform/**/*.tf
 
@@ -10,8 +8,6 @@ terraform/**/*.tfstate
 terraform/**/*.tfstate.backup
 terraform/**/.terraform/
 terraform/**/*.tfvars
-
-### Devops Portion
 
 !project/devops/
 !project/devops/**
