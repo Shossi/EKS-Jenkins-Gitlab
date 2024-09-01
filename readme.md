@@ -1,792 +1,145 @@
-# Main Terraform Modules Documentation
 
-## Project Directory Structure
+---
 
-```
-.
-|-- architecture.jpeg
-|-- devops
-|   |-- application
-|   |   `-- app.yaml
-|   |-- configurations
-|   |   |-- agent_configuration
-|   |   |-- cloudwatch
-|   |   |   `-- cloudwatch-config.json
-|   |   |-- gitlab_compose
-|   |   |   `-- docker-compose.yml
-|   |   `-- jenkins_compose
-|   |       `-- jenkins-compose.yml
-|   |-- pipelines
-|   |   |-- Jenkinsfile
-|   |   `-- Jenkinsfile.branches
-|   `-- terraform
-|       |-- eks
-|       |   `-- eks_only
-|       |-- instances.tf
-|       |-- k8s.tf
-|       |-- modules
-|       |   |-- eks
-|       |   |   |-- main.tf
-|       |   |   |-- output.tf
-|       |   |   `-- variables.tf
-|       |   |-- helm
-|       |   |   |-- main.tf
-|       |   |   |-- output.tf
-|       |   |   `-- variable.tf
-|       |   |-- iam_role_ingress
-|       |   |   |-- main.tf
-|       |   |   `-- variables.tf
-|       |   |-- instance
-|       |   |   |-- main.tf
-|       |   |   |-- output.tf
-|       |   |   `-- variables.tf
-|       |   |-- lb
-|       |   |   |-- main.tf
-|       |   |   |-- output.tf
-|       |   |   `-- variables.tf
-|       |   |-- network
-|       |   |   |-- main.tf
-|       |   |   |-- output.tf
-|       |   |   `-- variables.tf
-|       |   |-- roles
-|       |   |   |-- main.tf
-|       |   |   |-- outputs.tf
-|       |   |   `-- variables.tf
-|       |   |-- security_groups
-|       |   |   |-- main.tf
-|       |   |   |-- output.tf
-|       |   |   `-- variables.tf
-|       |   `-- service_account
-|       |       |-- main.tf
-|       |       |-- output.tf
-|       |       `-- variables.tf
-|       |-- network.tf
-|       |-- providers.tf
-|       |-- vpc_eks
-|       |   |-- k8s.tf
-|       |   |-- network.tf
-|       |   `-- providers.tf
-|       `-- vpc_vcs_ci
-|           |-- instances.tf
-|           |-- network.tf
-|           |-- output.tf
-|           `-- providers.tf
-|-- git_hooks
-|   `-- pre-push
-|-- git_scripts
-|   |-- prereqs_windows.bat
-|   `-- setup_hooks_windows.bat
-|-- pipeline.jpeg
-|-- readme.md
-`-- src
-    |-- Dockerfile
-    |-- Modules
-    |   |-- apicall.py
-    |   |-- get_weekdays.py
-    |   |-- login.py
-    |   |-- signup.py
-    |   `-- translate_country.py
-    |-- app.py
-    |-- docker-compose.yml
-    |-- lambda
-    |   `-- lambda.py
-    |-- nginx.conf
-    |-- requirements.txt
-    |-- static
-    |   |-- login.css
-    |   |-- signup.css
-    |   `-- weathericons
-    |       `-- README
-    |-- templates
-    |   |-- downloads.html
-    |   |-- login.html
-    |   |-- signup.html
-    |   `-- weather.html
-    |-- tests
-    |   |-- requirements.txt
-    |   `-- webtest.py
-    |-- virt
-    |   `-- bin
-    |       |-- activate
-    |       |-- activate_this.py
-    |       |-- chardetect
-    |       |-- easy_install
-    |       |-- easy_install3
-    |       |-- flask
-    |       |-- gunicorn
-    |       |-- jp.py
-    |       |-- normalizer
-    |       |-- pip
-    |       |-- pip3
-    |       |-- pytest
-    |       |-- python
-    |       |-- python3
-    |       |-- translate
-    |       |-- wheel
-    |       `-- wheel3
-    `-- wsgi.py
-```
+# Jenkins-GitLab CI/CD Pipeline Project
+
+![Architecture Diagram](./architecture.jpeg)
+
+## Overview
+
+This project automates the deployment of a cloud infrastructure using Terraform, with continuous integration and deployment pipelines managed by Jenkins and GitLab. The main components include:
+
+- Jenkins (Server-Agent)
+- GitLab Server
+- EKS (Elastic Kubernetes Service)
+- Terraform
+- Slack for notifications
+
+For detailed information about the infrastructure setup and Terraform modules, please refer to the [Terraform Documentation](./devops/terraform/README.md).
 
 ## Table of Contents
 
-- [.git](#.git)
-- [hooks](#hooks)
-- [info](#info)
-- [logs](#logs)
-- [objects](#objects)
-- [refs](#refs)
-- [.idea](#.idea)
-- [devops](#devops)
-- [application](#application)
-- [configurations](#configurations)
-- [pipelines](#pipelines)
-- [terraform](#terraform)
-- [git_hooks](#git_hooks)
-- [git_scripts](#git_scripts)
-- [src](#src)
-- [lambda](#lambda)
-- [Modules](#Modules)
-- [static](#static)
-- [templates](#templates)
-- [tests](#tests)
-- [virt](#virt)
+1. [Infrastructure Overview](#infrastructure-overview)
+2. [Terraform Components](#terraform-components)
+    - [VPC and Subnets](#vpc-and-subnets)
+    - [Security Groups](#security-groups)
+    - [Instances](#instances)
+    - [Load Balancer](#load-balancer)
+    - [EKS Cluster](#eks-cluster)
+3. [Pipelines](#pipelines)
+    - [Branches Pipeline](#branches-pipeline)
+    - [Master Pipeline](#master-pipeline)
+4. [Application](#application)
+5. [Tests](#tests)
+6. [Monitoring](#aws-cloudwatch-monitoring)
+7. [Configurations](#configurations)
+    - [Jenkins](#jenkins)
+    - [GitLab](#gitlab)
 
+## Infrastructure Overview
 
-## .git
+The infrastructure is entirely managed by Terraform and includes the following components. For more details, please see the [Terraform Documentation](./devops/terraform/README.md).
 
----
+## Terraform Components
 
-## Requirements
+### VPC and Subnets
 
-No requirements.
+- VPC with 3 private subnets and 3 public subnets.
 
-## Providers
+### Security Groups
 
-No providers.
+- Security Group for Jenkins and GitLab instances.
+- Security Group for the bastion host.
 
-## Modules
+### Instances
 
-No modules.
+- `Jenkins Agent`: private subnet.
+- `Jenkins Controller`: private subnet.
+- `GitLab`: private subnet.
+- `Bastion Host`: public subnet.
 
-## Resources
+### Load Balancer
 
-No resources.
+- Application Load Balancer with listeners for Jenkins and GitLab.
+- `Jenkins`: port 8080
+- `GitLab`: port 80
 
-## Inputs
+### EKS Cluster
 
-No inputs.
+- EKS cluster with nodes in private subnets and necessary IAM roles.
 
-## Outputs
+## Pipelines
 
-No outputs.
+![Pipeline Diagram](./pipeline.jpeg)
 
+### Branches Pipeline
 
-## hooks
+- Stages:
+    - Build Docker Image
+    - Test Docker Image
 
----
+- `Trigger`: Merge Request to Master branch.
 
-## Requirements
+### Master Pipeline
 
-No requirements.
+- Stages:
+    - Determines the source branch of the merge request.
+    - Updates the version depending on the source branch (Major for `release/*`, Minor for `feature/*`, Patch for `hotfix/*`).
+    - Builds the artifact (Docker image).
+    - Pushes the Docker image to Docker Hub ([yossizxc/weather](https://hub.docker.com/repository/docker/yossizxc/weather/general)).
+    - Changes the kubeconfig context to the cluster using `aws eks update-kubeconfig`.
+    - Deploys the new Docker image on the two nodes.
 
-## Providers
+- `Trigger`: Accepted Merge Request to Master Branch.
 
-No providers.
+## Application
 
-## Modules
+- **Weather API:**
+    - A Flask application using Gunicorn as a WSGI server.
 
-No modules.
+## Tests
 
-## Resources
+- **Connectivity Test:**
+    - Checks if the server is running properly by sending a request to the localhost on the specified port.
 
-No resources.
+- **Code Linting:**
+    - A pre-push Git hook runs pylint to ensure code quality before code is pushed to the repository.
 
-## Inputs
+## AWS CloudWatch Monitoring
 
-No inputs.
+This project uses AWS CloudWatch to monitor the infrastructure:
 
-## Outputs
+- **EC2 Instance Monitoring:**
+    - Collects metrics such as CPU utilization, disk usage, and memory usage.
+    - Configured using the AWS CloudWatch Agent.
 
-No outputs.
+- **CloudWatch Alarms:**
+    - Alarms set up to notify when thresholds (e.g., high CPU usage) are breached.
+    - Notifications sent via SNS to your email.
 
+## Configurations
 
-## info
+### Jenkins
 
----
+- **Credentials:**
+    - GitLab account for SCM connection.
+    - AWS Credentials.
+    - DockerHub Credentials.
+    - SSH key or other configurations for agent-controller connection.
+    - Slack Credentials.
 
-## Requirements
+- **Pipelines:**
+    - Create two pipelines with the relevant configurations:
+        - One for created and updated merge requests.
+        - One for accepted merge requests (includes additional parameters).
 
-No requirements.
+- **Shared Groovy Library:**
+    - Used to implement and maintain the versioning scheme and configuration.
 
-## Providers
+### GitLab
 
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## logs
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## objects
+- **Webhooks:**
+    - One webhook for the branch pipeline (builds and tests).
+    - Another webhook for the deployment pipeline (triggered upon merge request acceptance).
 
 ---
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## refs
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## .idea
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## devops
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## application
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## configurations
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## pipelines
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## terraform
-
----
-
-## Requirements
-
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | . |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.5.0 |
-| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.6.0 |
-| <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 1.7.0 |
-
-## Providers
-
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.5.0 |
-| <a name="provider_http"></a> [http](#provider\_http) | n/a |
-
-## Modules
-
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/helm | n/a |
-| <a name="module_bastion"></a> [bastion](#module\_bastion) | ./modules/instance | n/a |
-| <a name="module_bastion_sg"></a> [bastion\_sg](#module\_bastion\_sg) | ./modules/security_groups | n/a |
-| <a name="module_cluster_autoscaler"></a> [cluster\_autoscaler](#module\_cluster\_autoscaler) | ./modules/helm | n/a |
-| <a name="module_cluster_autoscaler_service_account"></a> [cluster\_autoscaler\_service\_account](#module\_cluster\_autoscaler\_service\_account) | ./modules/cluster-autoscaler | n/a |
-| <a name="module_default_sg"></a> [default\_sg](#module\_default\_sg) | ./modules/security_groups | n/a |
-| <a name="module_dev_network"></a> [dev\_network](#module\_dev\_network) | ./modules/network | n/a |
-| <a name="module_gitlab"></a> [gitlab](#module\_gitlab) | ./modules/instance | n/a |
-| <a name="module_iam_role_ingress"></a> [iam\_role\_ingress](#module\_iam\_role\_ingress) | ./modules/iam_role_ingress | n/a |
-| <a name="module_ingress_controller"></a> [ingress\_controller](#module\_ingress\_controller) | ./modules/helm | n/a |
-| <a name="module_jenkins"></a> [jenkins](#module\_jenkins) | ./modules/instance | n/a |
-| <a name="module_jenkins_agent"></a> [jenkins\_agent](#module\_jenkins\_agent) | ./modules/instance | n/a |
-| <a name="module_jenkins_agent_iam_role"></a> [jenkins\_agent\_iam\_role](#module\_jenkins\_agent\_iam\_role) | ./modules/roles | n/a |
-| <a name="module_k8s"></a> [k8s](#module\_k8s) | ./modules/eks | n/a |
-| <a name="module_lb"></a> [lb](#module\_lb) | ./modules/lb | n/a |
-| <a name="module_prod_network"></a> [prod\_network](#module\_prod\_network) | ./modules/network | n/a |
-
-## Resources
-
-| Name | Type |
-|------|------|
-| [aws_key_pair.deployer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/key_pair) | resource |
-| [aws_eks_cluster_auth.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster_auth) | data source |
-| [http_http.ip](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
-
-## Inputs
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_public_key_path"></a> [public\_key\_path](#input\_public\_key\_path) | Path to the SSH public key | `string` | `"/home/yossi/.ssh/new_key.pub"` | no |
-
-## Outputs
-
-No outputs.
-
-
-## git_hooks
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## git_scripts
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## src
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## lambda
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## Modules
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## static
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## templates
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## tests
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-
-
-## virt
-
----
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
