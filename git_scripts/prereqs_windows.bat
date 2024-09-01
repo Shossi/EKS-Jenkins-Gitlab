@@ -24,3 +24,13 @@ pip install pylint
 echo Installation completed. Please restart your terminal or run 'refreshenv' to apply changes.
 
 exit 0
+
+
+:: in case of pylint command not running after the installation :
+:: You will need to Locate your python scripts directory path,
+:: Ususally it will look like so : C:\Users\***user***\AppData\Local\Packages\PYTHONVERSION\LocalCache\local-packages\Pythonversion\Scripts
+:: This can be found through : pip show pylint
+:: The path needs to be added to your env variables in your computer,
+:: System Properties > Advanced > Environment Variables > Path > Edit > new
+:: and add the scripts path there. after which you will need to restart your ide and it will work.
+:: pylint --version to verify.
