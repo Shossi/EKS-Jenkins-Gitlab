@@ -36,37 +36,54 @@ For detailed information about the infrastructure setup and Terraform modules, p
     - [Jenkins](#jenkins)
     - [GitLab](#gitlab)
 
+---
+
 ## Infrastructure Overview
 
-The infrastructure is entirely managed by Terraform and includes the following components. For more details, please see the [Terraform Documentation](./devops/terraform/README.md).
+The infrastructure is entirely managed by Terraform and includes two VPCs—one for Jenkins, GitLab, and the bastion host, and the other for the EKS cluster and its associated components. For more details, please see the [Terraform Documentation](./devops/terraform/README.md).
 
 ## Terraform Components
 
-### VPC and Subnets
+### VPCs and Subnets
 
-- VPC with 3 private subnets and 3 public subnets.
+- **VPC 1**: Dedicated for Jenkins, GitLab, and the bastion host with **1 private subnet and 1 public subnet**.
+- **VPC 2**: Dedicated for the EKS cluster with **2 private subnets and 2 public subnets** for secure networking.
 
 ### Security Groups
 
-- Security Group for Jenkins and GitLab instances.
-- Security Group for the bastion host.
+- **VPC 1**: Security Groups for Jenkins, GitLab, and the bastion host.
+- **VPC 2**: Security Groups for the EKS cluster and its associated components.
 
-### Instances
+### Instances (VPC 1)
 
-- `Jenkins Agent`: private subnet.
-- `Jenkins Controller`: private subnet.
-- `GitLab`: private subnet.
-- `Bastion Host`: public subnet.
+- `Jenkins Agent`: Deployed in the private subnet.
+- `Jenkins Controller`: Deployed in the private subnet.
+- `GitLab`: Deployed in the private subnet.
+- `Bastion Host`: Deployed in the public subnet for secure SSH access.
 
-### Load Balancer
+### Load Balancer (VPC 1)
 
 - Application Load Balancer with listeners for Jenkins and GitLab.
-- `Jenkins`: port 8080
-- `GitLab`: port 80
+  - `Jenkins`: port 8080
+  - `GitLab`: port 80
 
-### EKS Cluster
+### EKS Cluster (VPC 2)
 
-- EKS cluster with nodes in private subnets and necessary IAM roles.
+- The EKS cluster is deployed in VPC 2 with nodes in private subnets and necessary IAM roles provisioned through Terraform.
+- The cluster is configured with the following key add-ons and Helm charts:
+
+#### Add-ons Deployed via Terraform:
+- **CoreDNS**: Enables service discovery within the cluster.
+- **VPC CNI**: Integrates Kubernetes networking with AWS VPC for efficient pod networking.
+- **Kube-Proxy**: Manages networking rules and service communication across nodes.
+- **CloudWatch Agent**: Collects and pushes logs and metrics from the cluster to AWS CloudWatch for monitoring.
+
+#### Helm Charts Deployed:
+- **Cluster Autoscaler**: Automatically adjusts the number of nodes in the cluster based on CPU and memory usage.
+- **AWS Load Balancer Controller**: Manages AWS Application Load Balancers for services exposed via Kubernetes.
+- **ArgoCD**: GitOps continuous deployment tool that automatically deploys application updates when changes are made to the GitHub repository.
+
+---
 
 ## Pipelines
 
@@ -87,15 +104,19 @@ The infrastructure is entirely managed by Terraform and includes the following c
     - Updates the version depending on the source branch (Major for `release/*`, Minor for `feature/*`, Patch for `hotfix/*`).
     - Builds the artifact (Docker image).
     - Pushes the Docker image to Docker Hub ([yossizxc/weather](https://hub.docker.com/repository/docker/yossizxc/weather/general)).
-    - Changes the kubeconfig context to the cluster using `aws eks update-kubeconfig`.
-    - Deploys the new Docker image on the two nodes.
+    - Updates the values.yaml file in the GitHub repository with the new image tag.
+    - ArgoCD detects the change in the GitHub repository and automatically redeploys the updated application on the Kubernetes cluster.
 
 - `Trigger`: Accepted Merge Request to Master Branch.
+
+---
 
 ## Application
 
 - **Weather API:**
     - A Flask application using Gunicorn as a WSGI server.
+
+---
 
 ## Tests
 
@@ -105,6 +126,8 @@ The infrastructure is entirely managed by Terraform and includes the following c
 - **Code Linting:**
     - A pre-push Git hook runs pylint to ensure code quality before code is pushed to the repository.
 
+---
+
 ## AWS CloudWatch Monitoring
 
 This project uses AWS CloudWatch to monitor the infrastructure:
@@ -113,9 +136,14 @@ This project uses AWS CloudWatch to monitor the infrastructure:
     - Collects metrics such as CPU utilization, disk usage, and memory usage.
     - Configured using the AWS CloudWatch Agent.
 
+- **EKS Monitoring:**
+    - The **Cloud Observability Agent** is deployed to collect and send logs and metrics from the EKS cluster to CloudWatch.
+  
 - **CloudWatch Alarms:**
     - Alarms set up to notify when thresholds (e.g., high CPU usage) are breached.
     - Notifications sent via SNS to your email.
+
+---
 
 ## Configurations
 
